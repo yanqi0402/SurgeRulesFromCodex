@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+import textwrap
 import uuid
 from dataclasses import dataclass
 from html import unescape
@@ -37,6 +38,8 @@ class Provider:
     match_roots: tuple[str, ...] = ()
     exact_allow: tuple[str, ...] = ()
     live_fetch: bool = True
+    method: str = ""
+    process: str = ""
     note: str = ""
     source_kind: str = "html_list"
 
@@ -71,6 +74,12 @@ CLAUDE_CODE = Provider(
     ),
     match_roots=("anthropic.com", "claude.ai", "claude.com"),
     exact_allow=("storage.googleapis.com",),
+    method="Live fetch from Anthropic's official Claude Code network configuration page.",
+    process=(
+        "Download the official documentation page, locate the documented URL lists for core "
+        "access plus installer and update traffic, extract hostnames, convert them to Surge "
+        "DOMAIN rules, and fall back to a small official baseline if fetching or parsing fails."
+    ),
 )
 
 OPENAI = Provider(
@@ -104,6 +113,13 @@ OPENAI = Provider(
         domain("workos.imgix.net"),
     ),
     live_fetch=False,
+    method="Curated official baseline from OpenAI's allowlist guidance.",
+    process=(
+        "Start from OpenAI's official allowlist article, keep the clearly documented OpenAI "
+        "and third-party dependency host families, map exact hosts to DOMAIN and broad "
+        "families to DOMAIN-SUFFIX, and store the result statically because the Help Center "
+        "blocks unattended scraping with Cloudflare challenges."
+    ),
     note=(
         "Curated from OpenAI's official allowlist article. The Help Center is currently "
         "protected by Cloudflare challenges, so the updater keeps this official baseline "
@@ -123,6 +139,12 @@ APPLE_INTELLIGENCE = Provider(
         domain_suffix("smoot.apple.com"),
     ),
     live_fetch=False,
+    method="Curated official baseline from Apple's enterprise network guidance.",
+    process=(
+        "Use Apple's published Apple Intelligence, Siri, and Search network guidance, keep the "
+        "explicit Apple relay and assistant hosts needed by the feature set, and translate them "
+        "into a compact mix of DOMAIN and DOMAIN-SUFFIX rules."
+    ),
     note=(
         "Curated from Apple's enterprise network guidance for Apple Intelligence, Siri, "
         "and Search."
@@ -143,6 +165,12 @@ APPLE_SERVICES = Provider(
         domain_suffix("networking.apple"),
     ),
     live_fetch=False,
+    method="Curated official baseline from Apple's enterprise network guidance.",
+    process=(
+        "Review Apple's enterprise host tables, keep the stable Apple service families that are "
+        "useful as a practical Surge baseline, and collapse many related hosts into a smaller "
+        "set of service-oriented DOMAIN-SUFFIX rules."
+    ),
     note=(
         "Broad Apple services baseline distilled from Apple's enterprise host tables. "
         "It favors practical Surge suffix rules over a verbatim per-host translation."
@@ -161,6 +189,12 @@ NETFLIX = Provider(
         domain_suffix("nflxvideo.net"),
     ),
     live_fetch=False,
+    method="Curated first-party baseline.",
+    process=(
+        "Use stable Netflix-owned domain families that consistently cover the main app, media, "
+        "images, service operations, and Fast.com, then express them as DOMAIN-SUFFIX rules "
+        "without guessing at undocumented third-party delivery endpoints."
+    ),
     note=(
         "Netflix does not publish a public allowlist. This is a conservative first-party "
         "baseline inferred from stable Netflix-owned service and media domains."
@@ -175,6 +209,12 @@ HBO_MAX = Provider(
         domain_suffix("max.com"),
     ),
     live_fetch=False,
+    method="Curated first-party baseline.",
+    process=(
+        "Keep only the obvious Max and HBO Max brand domain families as a conservative starting "
+        "point, and avoid expanding into undocumented CDN or telemetry endpoints unless there is "
+        "a stronger public source to justify them."
+    ),
     note=(
         "Conservative first-party baseline for Max/HBO Max brand domains. Expand this "
         "section later if you want to capture additional service-specific delivery hosts."
@@ -190,6 +230,12 @@ TIKTOK_INTL = Provider(
         domain_suffix("tiktokcdn.com"),
     ),
     live_fetch=False,
+    method="Curated official baseline from TikTok developer documentation.",
+    process=(
+        "Read TikTok's official developer docs, keep the clearly visible international host "
+        "families used for the main site, open APIs, upload APIs, and documented CDN examples, "
+        "then emit them as DOMAIN-SUFFIX rules without expanding into speculative ByteDance CDN sets."
+    ),
     note=(
         "Conservative international TikTok baseline built from official TikTok developer "
         "docs that explicitly show tiktok.com, open.tiktokapis.com, open-upload.tiktokapis.com, "
@@ -220,6 +266,12 @@ MICROSOFT = Provider(
         domain_suffix("skype.com"),
         domain_suffix("teams.microsoft.com"),
         domain_suffix("windows.net"),
+    ),
+    method="Live fetch from Microsoft's official Microsoft 365 endpoint web service with fallback.",
+    process=(
+        "Request the worldwide Microsoft 365 endpoint JSON feed, convert literal hosts to DOMAIN "
+        "rules and wildcard entries to DOMAIN-SUFFIX rules, de-duplicate and sort the result, "
+        "and fall back to a core Microsoft productivity baseline if the web service is unavailable."
     ),
     note=(
         "Generated from Microsoft's official Microsoft 365 endpoint web service when "
@@ -408,13 +460,29 @@ def render_rules(rule_list: RuleList) -> str:
         rules = resolve_provider_rules(provider)
         lines.append(f"# {provider.name}")
         lines.append(f"# Source: {provider.source_url}")
+        if provider.method:
+            lines.extend(render_comment_block("Method", provider.method))
+        if provider.process:
+            lines.extend(render_comment_block("Process", provider.process))
         if provider.note:
-            lines.append(f"# Note: {provider.note}")
+            lines.extend(render_comment_block("Note", provider.note))
         for rule in rules:
             lines.append(f"{rule.rule_type},{rule.value}")
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
+
+
+def render_comment_block(label: str, text: str) -> list[str]:
+    wrapped = textwrap.wrap(
+        text,
+        width=96,
+        initial_indent=f"# {label}: ",
+        subsequent_indent="#   ",
+        break_long_words=False,
+        break_on_hyphens=False,
+    )
+    return wrapped or [f"# {label}: "]
 
 
 def main() -> int:

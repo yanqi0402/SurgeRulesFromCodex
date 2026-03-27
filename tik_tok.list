@@ -3,7 +3,13 @@
 
 # TikTok (International)
 # Source: https://developers.tiktok.com/doc/content-posting-api-get-started/
-# Note: Conservative international TikTok baseline built from official TikTok developer docs that explicitly show tiktok.com, open.tiktokapis.com, open-upload.tiktokapis.com, and tiktokcdn.com. Expand later if you want a broader inferred ByteDance CDN set.
+# Method: Curated official baseline from TikTok developer documentation.
+# Process: Read TikTok's official developer docs, keep the clearly visible international host
+#   families used for the main site, open APIs, upload APIs, and documented CDN examples, then
+#   emit them as DOMAIN-SUFFIX rules without expanding into speculative ByteDance CDN sets.
+# Note: Conservative international TikTok baseline built from official TikTok developer docs
+#   that explicitly show tiktok.com, open.tiktokapis.com, open-upload.tiktokapis.com, and
+#   tiktokcdn.com. Expand later if you want a broader inferred ByteDance CDN set.
 DOMAIN-SUFFIX,tiktok.com
 DOMAIN-SUFFIX,tiktokapis.com
 DOMAIN-SUFFIX,tiktokcdn.com

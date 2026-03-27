@@ -3,7 +3,12 @@
 
 # Microsoft
 # Source: https://endpoints.office.com/endpoints/worldwide
-# Note: Generated from Microsoft's official Microsoft 365 endpoint web service when available, with a fallback baseline of core identity and productivity domains.
+# Method: Live fetch from Microsoft's official Microsoft 365 endpoint web service with fallback.
+# Process: Request the worldwide Microsoft 365 endpoint JSON feed, convert literal hosts to
+#   DOMAIN rules and wildcard entries to DOMAIN-SUFFIX rules, de-duplicate and sort the result,
+#   and fall back to a core Microsoft productivity baseline if the web service is unavailable.
+# Note: Generated from Microsoft's official Microsoft 365 endpoint web service when available,
+#   with a fallback baseline of core identity and productivity domains.
 DOMAIN,account.activedirectory.windowsazure.com
 DOMAIN,account.live.com
 DOMAIN,accounts.accesscontrol.windows.net

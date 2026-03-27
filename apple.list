@@ -3,7 +3,12 @@
 
 # Apple Services
 # Source: https://support.apple.com/en-us/101555
-# Note: Broad Apple services baseline distilled from Apple's enterprise host tables. It favors practical Surge suffix rules over a verbatim per-host translation.
+# Method: Curated official baseline from Apple's enterprise network guidance.
+# Process: Review Apple's enterprise host tables, keep the stable Apple service families that
+#   are useful as a practical Surge baseline, and collapse many related hosts into a smaller set
+#   of service-oriented DOMAIN-SUFFIX rules.
+# Note: Broad Apple services baseline distilled from Apple's enterprise host tables. It favors
+#   practical Surge suffix rules over a verbatim per-host translation.
 DOMAIN-SUFFIX,apple-cloudkit.com
 DOMAIN-SUFFIX,apple.com
 DOMAIN-SUFFIX,cdn-apple.com

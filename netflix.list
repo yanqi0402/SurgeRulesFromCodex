@@ -3,7 +3,12 @@
 
 # Netflix
 # Source: https://www.netflix.com
-# Note: Netflix does not publish a public allowlist. This is a conservative first-party baseline inferred from stable Netflix-owned service and media domains.
+# Method: Curated first-party baseline.
+# Process: Use stable Netflix-owned domain families that consistently cover the main app, media,
+#   images, service operations, and Fast.com, then express them as DOMAIN-SUFFIX rules without
+#   guessing at undocumented third-party delivery endpoints.
+# Note: Netflix does not publish a public allowlist. This is a conservative first-party baseline
+#   inferred from stable Netflix-owned service and media domains.
 DOMAIN-SUFFIX,fast.com
 DOMAIN-SUFFIX,netflix.com
 DOMAIN-SUFFIX,nflxext.com

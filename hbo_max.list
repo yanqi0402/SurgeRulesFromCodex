@@ -3,6 +3,11 @@
 
 # HBO Max / Max
 # Source: https://www.max.com
-# Note: Conservative first-party baseline for Max/HBO Max brand domains. Expand this section later if you want to capture additional service-specific delivery hosts.
+# Method: Curated first-party baseline.
+# Process: Keep only the obvious Max and HBO Max brand domain families as a conservative
+#   starting point, and avoid expanding into undocumented CDN or telemetry endpoints unless
+#   there is a stronger public source to justify them.
+# Note: Conservative first-party baseline for Max/HBO Max brand domains. Expand this section
+#   later if you want to capture additional service-specific delivery hosts.
 DOMAIN-SUFFIX,hbomax.com
 DOMAIN-SUFFIX,max.com

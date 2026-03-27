@@ -3,6 +3,10 @@
 
 # Claude Code
 # Source: https://code.claude.com/docs/en/network-config
+# Method: Live fetch from Anthropic's official Claude Code network configuration page.
+# Process: Download the official documentation page, locate the documented URL lists for core
+#   access plus installer and update traffic, extract hostnames, convert them to Surge DOMAIN
+#   rules, and fall back to a small official baseline if fetching or parsing fails.
 DOMAIN,api.anthropic.com
 DOMAIN,claude.ai
 DOMAIN,downloads.claude.ai
@@ -11,7 +15,14 @@ DOMAIN,storage.googleapis.com
 
 # OpenAI
 # Source: https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
-# Note: Curated from OpenAI's official allowlist article. The Help Center is currently protected by Cloudflare challenges, so the updater keeps this official baseline instead of attempting unattended scraping.
+# Method: Curated official baseline from OpenAI's allowlist guidance.
+# Process: Start from OpenAI's official allowlist article, keep the clearly documented OpenAI
+#   and third-party dependency host families, map exact hosts to DOMAIN and broad families to
+#   DOMAIN-SUFFIX, and store the result statically because the Help Center blocks unattended
+#   scraping with Cloudflare challenges.
+# Note: Curated from OpenAI's official allowlist article. The Help Center is currently protected
+#   by Cloudflare challenges, so the updater keeps this official baseline instead of attempting
+#   unattended scraping.
 DOMAIN,cdn.openaimerge.com
 DOMAIN,cdn.workos.com
 DOMAIN,challenges.cloudflare.com
@@ -40,7 +51,12 @@ DOMAIN-SUFFIX,statsig.com
 
 # Apple Intelligence
 # Source: https://support.apple.com/en-us/101555
-# Note: Curated from Apple's enterprise network guidance for Apple Intelligence, Siri, and Search.
+# Method: Curated official baseline from Apple's enterprise network guidance.
+# Process: Use Apple's published Apple Intelligence, Siri, and Search network guidance, keep the
+#   explicit Apple relay and assistant hosts needed by the feature set, and translate them into
+#   a compact mix of DOMAIN and DOMAIN-SUFFIX rules.
+# Note: Curated from Apple's enterprise network guidance for Apple Intelligence, Siri, and
+#   Search.
 DOMAIN,apple-relay.apple.com
 DOMAIN,apple-relay.cloudflare.com
 DOMAIN,apple-relay.fastly-edge.com
