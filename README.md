@@ -8,6 +8,7 @@ Auto-maintained Surge rule lists.
 - `apple.list`: Apple service domains
 - `netflix.list`: Netflix domains
 - `hbo_max.list`: Max / HBO Max domains
+- `tik_tok.list`: TikTok international domains
 - `microsoft.list`: Microsoft domains
 - `scripts/update_ai_rules.py`: regenerates all rule list files
 - `.github/workflows/update-ai-rules.yml`: runs the updater on schedule and pushes changes
@@ -25,11 +26,12 @@ Additional list files currently track:
 - Apple services in `apple.list`
 - Netflix in `netflix.list`
 - Max / HBO Max in `hbo_max.list`
+- TikTok international in `tik_tok.list`
 - Microsoft in `microsoft.list`
 
 The updater is intentionally structured so we can add more services later without replacing the existing file layout.
 
-For OpenAI, Netflix, and Max / HBO Max, the repo currently keeps curated baselines. OpenAI's Help Center uses Cloudflare bot challenges that block simple unattended fetches, while Netflix and Max don't publish a practical public allowlist we can scrape reliably. Microsoft is generated from the official Microsoft 365 endpoint web service when available, with a curated fallback baseline.
+For OpenAI, Netflix, Max / HBO Max, and TikTok, the repo currently keeps curated baselines. OpenAI's Help Center uses Cloudflare bot challenges that block simple unattended fetches, while Netflix and Max don't publish a practical public allowlist we can scrape reliably. The TikTok list is intentionally conservative and sticks to the official TikTok host families visible in developer documentation. Microsoft is generated from the official Microsoft 365 endpoint web service when available, with a curated fallback baseline.
 
 ## Automation
 

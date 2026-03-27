@@ -181,6 +181,22 @@ HBO_MAX = Provider(
     ),
 )
 
+TIKTOK_INTL = Provider(
+    name="TikTok (International)",
+    source_url="https://developers.tiktok.com/doc/content-posting-api-get-started/",
+    fallback_rules=(
+        domain_suffix("tiktok.com"),
+        domain_suffix("tiktokapis.com"),
+        domain_suffix("tiktokcdn.com"),
+    ),
+    live_fetch=False,
+    note=(
+        "Conservative international TikTok baseline built from official TikTok developer "
+        "docs that explicitly show tiktok.com, open.tiktokapis.com, open-upload.tiktokapis.com, "
+        "and tiktokcdn.com. Expand later if you want a broader inferred ByteDance CDN set."
+    ),
+)
+
 MICROSOFT = Provider(
     name="Microsoft",
     source_url="https://endpoints.office.com/endpoints/worldwide",
@@ -228,6 +244,10 @@ RULE_LISTS = (
     RuleList(
         output_path=Path("hbo_max.list"),
         providers=(HBO_MAX,),
+    ),
+    RuleList(
+        output_path=Path("tik_tok.list"),
+        providers=(TIKTOK_INTL,),
     ),
     RuleList(
         output_path=Path("microsoft.list"),
