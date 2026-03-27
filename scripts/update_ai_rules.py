@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
+import json
 import re
 import sys
+import uuid
 from dataclasses import dataclass
 from html import unescape
 from pathlib import Path
@@ -36,6 +38,7 @@ class Provider:
     exact_allow: tuple[str, ...] = ()
     live_fetch: bool = True
     note: str = ""
+    source_kind: str = "html_list"
 
 
 @dataclass(frozen=True)
@@ -178,6 +181,37 @@ HBO_MAX = Provider(
     ),
 )
 
+MICROSOFT = Provider(
+    name="Microsoft",
+    source_url="https://endpoints.office.com/endpoints/worldwide",
+    fallback_rules=(
+        domain_suffix("live.com"),
+        domain_suffix("microsoft.com"),
+        domain_suffix("microsoftonline.com"),
+        domain_suffix("microsoft365.com"),
+        domain_suffix("msauth.net"),
+        domain_suffix("msauthimages.net"),
+        domain_suffix("msftauth.net"),
+        domain_suffix("msftauthimages.net"),
+        domain_suffix("office.com"),
+        domain_suffix("office.net"),
+        domain_suffix("office365.com"),
+        domain_suffix("onedrive.com"),
+        domain_suffix("onenote.net"),
+        domain_suffix("onmicrosoft.com"),
+        domain_suffix("outlook.com"),
+        domain_suffix("sharepoint.com"),
+        domain_suffix("skype.com"),
+        domain_suffix("teams.microsoft.com"),
+        domain_suffix("windows.net"),
+    ),
+    note=(
+        "Generated from Microsoft's official Microsoft 365 endpoint web service when "
+        "available, with a fallback baseline of core identity and productivity domains."
+    ),
+    source_kind="m365_endpoints",
+)
+
 RULE_LISTS = (
     RuleList(
         output_path=Path("AI.list"),
@@ -195,6 +229,10 @@ RULE_LISTS = (
         output_path=Path("hbo_max.list"),
         providers=(HBO_MAX,),
     ),
+    RuleList(
+        output_path=Path("microsoft.list"),
+        providers=(MICROSOFT,),
+    ),
 )
 
 
@@ -211,6 +249,21 @@ def fetch_html(url: str) -> str:
     )
     with urlopen(request, timeout=15) as response:
         return response.read().decode("utf-8", errors="replace")
+
+
+def fetch_json(url: str) -> object:
+    request = Request(
+        url,
+        headers={
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/123.0.0.0 Safari/537.36"
+            )
+        },
+    )
+    with urlopen(request, timeout=20) as response:
+        return json.load(response)
 
 
 def sanitize_text(text: str) -> str:
@@ -259,8 +312,43 @@ def domain_rule(domain_name: str) -> RuleEntry:
     return domain(domain_name)
 
 
+def normalize_wildcard_url(raw_value: str) -> RuleEntry | None:
+    value = raw_value.strip().lower()
+    if not value:
+        return None
+    if value.startswith("*."):
+        return domain_suffix(value[2:])
+    if value.startswith("*"):
+        return domain_suffix(value[1:].lstrip("."))
+    if "*" in value:
+        suffix = value.split("*")[-1].lstrip(".")
+        return domain_suffix(suffix) if suffix else None
+    return domain(value)
+
+
 def sort_rules(rules: Iterable[RuleEntry]) -> list[RuleEntry]:
     return sorted(rules, key=lambda rule: (rule.rule_type, rule.value))
+
+
+def extract_microsoft_rules(provider: Provider) -> list[RuleEntry]:
+    client_request_id = uuid.uuid4()
+    endpoint_url = f"{provider.source_url}?clientrequestid={client_request_id}"
+    payload = fetch_json(endpoint_url)
+    if not isinstance(payload, list):
+        return []
+
+    rules: set[RuleEntry] = set()
+    for entry in payload:
+        if not isinstance(entry, dict):
+            continue
+        for raw_value in entry.get("urls") or []:
+            if not isinstance(raw_value, str):
+                continue
+            rule = normalize_wildcard_url(raw_value)
+            if rule is not None:
+                rules.add(rule)
+
+    return sort_rules(rules)
 
 
 def resolve_provider_rules(provider: Provider) -> list[RuleEntry]:
@@ -268,15 +356,17 @@ def resolve_provider_rules(provider: Provider) -> list[RuleEntry]:
         return sort_rules(provider.fallback_rules)
 
     try:
-        html_text = fetch_html(provider.source_url)
-    except URLError as exc:
+        if provider.source_kind == "m365_endpoints":
+            rules = extract_microsoft_rules(provider)
+        else:
+            html_text = fetch_html(provider.source_url)
+            rules = extract_rules(provider, html_text)
+    except (URLError, OSError, ValueError) as exc:
         print(
             f"[warn] {provider.name}: failed to fetch official source, using fallback ({exc})",
             file=sys.stderr,
         )
         return sort_rules(provider.fallback_rules)
-
-    rules = extract_rules(provider, html_text)
     if rules:
         return rules
 
