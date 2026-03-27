@@ -8,3 +8,32 @@ DOMAIN,claude.ai
 DOMAIN,downloads.claude.ai
 DOMAIN,platform.claude.com
 DOMAIN,storage.googleapis.com
+
+# OpenAI
+# Source: https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
+# Note: Curated from OpenAI's official allowlist article. The Help Center is currently protected by Cloudflare challenges, so the updater keeps this official baseline instead of attempting unattended scraping.
+DOMAIN,cdn.openaimerge.com
+DOMAIN,cdn.workos.com
+DOMAIN,challenges.cloudflare.com
+DOMAIN,events.statsigapi.net
+DOMAIN,featureassets.org
+DOMAIN,forwarder.workos.com
+DOMAIN,humb.apple.com
+DOMAIN,images.workoscdn.com
+DOMAIN,js.stripe.com
+DOMAIN,o207216.ingest.sentry.io
+DOMAIN,o33249.ingest.sentry.io
+DOMAIN,prodregistryv2.org
+DOMAIN,rum.browser-intake-datadoghq.com
+DOMAIN,setup.workos.com
+DOMAIN,statsigapi.net
+DOMAIN,workos.imgix.net
+DOMAIN-SUFFIX,chatgpt.com
+DOMAIN-SUFFIX,ct.sendgrid.net
+DOMAIN-SUFFIX,featuregates.org
+DOMAIN-SUFFIX,intercom.io
+DOMAIN-SUFFIX,intercomcdn.com
+DOMAIN-SUFFIX,oaistatic.com
+DOMAIN-SUFFIX,oaiusercontent.com
+DOMAIN-SUFFIX,openai.com
+DOMAIN-SUFFIX,statsig.com

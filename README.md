@@ -13,8 +13,11 @@ Auto-maintained Surge rule lists.
 `AI.list` currently tracks Claude Code's official network access requirements from:
 
 - `https://code.claude.com/docs/en/network-config`
+- `https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps`
 
 The updater is intentionally structured so we can add more AI services later without replacing the existing file layout.
+
+For OpenAI, the rules are kept as a curated official baseline because the Help Center currently uses Cloudflare bot challenges that block unattended fetches in simple CI clients.
 
 ## Automation
 

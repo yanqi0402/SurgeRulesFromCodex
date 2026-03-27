@@ -23,11 +23,29 @@ LIST_ITEM_RE = re.compile(
 
 
 @dataclass(frozen=True)
+class RuleEntry:
+    rule_type: str
+    value: str
+
+
+@dataclass(frozen=True)
 class Provider:
     name: str
     source_url: str
-    intro_markers: tuple[str, ...]
-    fallback_domains: tuple[str, ...]
+    intro_markers: tuple[str, ...] = ()
+    fallback_rules: tuple[RuleEntry, ...] = ()
+    match_roots: tuple[str, ...] = ()
+    exact_allow: tuple[str, ...] = ()
+    live_fetch: bool = True
+    note: str = ""
+
+
+def domain(value: str) -> RuleEntry:
+    return RuleEntry("DOMAIN", value)
+
+
+def domain_suffix(value: str) -> RuleEntry:
+    return RuleEntry("DOMAIN-SUFFIX", value)
 
 
 CLAUDE_CODE = Provider(
@@ -37,16 +55,56 @@ CLAUDE_CODE = Provider(
         "Claude Code requires access to the following URLs:",
         "The native installer and update checks also require the following URLs.",
     ),
-    fallback_domains=(
-        "api.anthropic.com",
-        "claude.ai",
-        "downloads.claude.ai",
-        "platform.claude.com",
-        "storage.googleapis.com",
+    fallback_rules=(
+        domain("api.anthropic.com"),
+        domain("claude.ai"),
+        domain("downloads.claude.ai"),
+        domain("platform.claude.com"),
+        domain("storage.googleapis.com"),
+    ),
+    match_roots=("anthropic.com", "claude.ai", "claude.com"),
+    exact_allow=("storage.googleapis.com",),
+)
+
+OPENAI = Provider(
+    name="OpenAI",
+    source_url="https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps",
+    fallback_rules=(
+        domain_suffix("chatgpt.com"),
+        domain_suffix("ct.sendgrid.net"),
+        domain_suffix("featuregates.org"),
+        domain_suffix("intercom.io"),
+        domain_suffix("intercomcdn.com"),
+        domain_suffix("oaistatic.com"),
+        domain_suffix("oaiusercontent.com"),
+        domain_suffix("openai.com"),
+        domain_suffix("statsig.com"),
+        domain("cdn.openaimerge.com"),
+        domain("cdn.workos.com"),
+        domain("challenges.cloudflare.com"),
+        domain("events.statsigapi.net"),
+        domain("featureassets.org"),
+        domain("forwarder.workos.com"),
+        domain("humb.apple.com"),
+        domain("images.workoscdn.com"),
+        domain("js.stripe.com"),
+        domain("o207216.ingest.sentry.io"),
+        domain("o33249.ingest.sentry.io"),
+        domain("prodregistryv2.org"),
+        domain("rum.browser-intake-datadoghq.com"),
+        domain("setup.workos.com"),
+        domain("statsigapi.net"),
+        domain("workos.imgix.net"),
+    ),
+    live_fetch=False,
+    note=(
+        "Curated from OpenAI's official allowlist article. The Help Center is currently "
+        "protected by Cloudflare challenges, so the updater keeps this official baseline "
+        "instead of attempting unattended scraping."
     ),
 )
 
-PROVIDERS = (CLAUDE_CODE,)
+PROVIDERS = (CLAUDE_CODE, OPENAI)
 
 
 def fetch_html(url: str) -> str:
@@ -69,12 +127,11 @@ def sanitize_text(text: str) -> str:
     return re.sub(r"\s+", " ", unescape(without_tags)).strip()
 
 
-def looks_relevant(domain: str) -> bool:
+def looks_relevant(domain: str, provider: Provider) -> bool:
     domain = domain.lower()
-    if domain == "storage.googleapis.com":
+    if domain in provider.exact_allow:
         return True
-    roots = ("anthropic.com", "claude.ai", "claude.com")
-    return any(domain == root or domain.endswith(f".{root}") for root in roots)
+    return any(domain == root or domain.endswith(f".{root}") for root in provider.match_roots)
 
 
 def extract_lists_by_intro(html_text: str, markers: Iterable[str]) -> list[str]:
@@ -89,25 +146,36 @@ def extract_lists_by_intro(html_text: str, markers: Iterable[str]) -> list[str]:
     return fragments
 
 
-def extract_domains(provider: Provider, html_text: str) -> list[str]:
-    domains: set[str] = set()
+def extract_rules(provider: Provider, html_text: str) -> list[RuleEntry]:
+    rules: set[RuleEntry] = set()
     for fragment in extract_lists_by_intro(html_text, provider.intro_markers):
         for match in LIST_ITEM_RE.finditer(fragment):
             domain = match.group("domain").lower()
-            if looks_relevant(domain):
-                domains.add(domain)
+            if looks_relevant(domain, provider):
+                rules.add(domain_rule(domain))
 
-    if domains:
-        return sorted(domains)
+    if rules:
+        return sort_rules(rules)
 
     for domain in HOSTNAME_RE.findall(sanitize_text(html_text)):
         domain = domain.lower()
-        if looks_relevant(domain):
-            domains.add(domain)
-    return sorted(domains)
+        if looks_relevant(domain, provider):
+            rules.add(domain_rule(domain))
+    return sort_rules(rules)
 
 
-def resolve_provider_domains(provider: Provider) -> list[str]:
+def domain_rule(domain_name: str) -> RuleEntry:
+    return domain(domain_name)
+
+
+def sort_rules(rules: Iterable[RuleEntry]) -> list[RuleEntry]:
+    return sorted(rules, key=lambda rule: (rule.rule_type, rule.value))
+
+
+def resolve_provider_rules(provider: Provider) -> list[RuleEntry]:
+    if not provider.live_fetch:
+        return sort_rules(provider.fallback_rules)
+
     try:
         html_text = fetch_html(provider.source_url)
     except URLError as exc:
@@ -115,17 +183,17 @@ def resolve_provider_domains(provider: Provider) -> list[str]:
             f"[warn] {provider.name}: failed to fetch official source, using fallback ({exc})",
             file=sys.stderr,
         )
-        return sorted(set(provider.fallback_domains))
+        return sort_rules(provider.fallback_rules)
 
-    domains = extract_domains(provider, html_text)
-    if domains:
-        return domains
+    rules = extract_rules(provider, html_text)
+    if rules:
+        return rules
 
     print(
         f"[warn] {provider.name}: failed to parse official source, using fallback",
         file=sys.stderr,
     )
-    return sorted(set(provider.fallback_domains))
+    return sort_rules(provider.fallback_rules)
 
 
 def render_rules() -> str:
@@ -136,11 +204,13 @@ def render_rules() -> str:
     ]
 
     for provider in PROVIDERS:
-        domains = resolve_provider_domains(provider)
+        rules = resolve_provider_rules(provider)
         lines.append(f"# {provider.name}")
         lines.append(f"# Source: {provider.source_url}")
-        for domain in domains:
-            lines.append(f"DOMAIN,{domain}")
+        if provider.note:
+            lines.append(f"# Note: {provider.note}")
+        for rule in rules:
+            lines.append(f"{rule.rule_type},{rule.value}")
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
