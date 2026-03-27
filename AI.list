@@ -37,3 +37,13 @@ DOMAIN-SUFFIX,oaistatic.com
 DOMAIN-SUFFIX,oaiusercontent.com
 DOMAIN-SUFFIX,openai.com
 DOMAIN-SUFFIX,statsig.com
+
+# Apple Intelligence
+# Source: https://support.apple.com/en-us/101555
+# Note: Curated from Apple's enterprise network guidance for Apple Intelligence, Siri, and Search.
+DOMAIN,apple-relay.apple.com
+DOMAIN,apple-relay.cloudflare.com
+DOMAIN,apple-relay.fastly-edge.com
+DOMAIN,cp4.cloudflare.com
+DOMAIN,guzzoni.apple.com
+DOMAIN-SUFFIX,smoot.apple.com

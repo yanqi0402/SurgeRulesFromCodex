@@ -4,23 +4,33 @@ Auto-maintained Surge rule lists.
 
 ## Files
 
-- `AI.list`: AI-related domains for Surge `RULE-SET` usage
-- `scripts/update_ai_rules.py`: fetches official sources and regenerates `AI.list`
+- `AI.list`: AI-related domains, currently including Claude Code, OpenAI, and Apple Intelligence
+- `apple.list`: Apple service domains
+- `netflix.list`: Netflix domains
+- `hbo_max.list`: Max / HBO Max domains
+- `scripts/update_ai_rules.py`: regenerates all rule list files
 - `.github/workflows/update-ai-rules.yml`: runs the updater on schedule and pushes changes
 
 ## Current coverage
 
-`AI.list` currently tracks Claude Code's official network access requirements from:
+`AI.list` currently tracks:
 
 - `https://code.claude.com/docs/en/network-config`
 - `https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps`
+- `https://support.apple.com/en-us/101555`
 
-The updater is intentionally structured so we can add more AI services later without replacing the existing file layout.
+Additional list files currently track:
 
-For OpenAI, the rules are kept as a curated official baseline because the Help Center currently uses Cloudflare bot challenges that block unattended fetches in simple CI clients.
+- Apple services in `apple.list`
+- Netflix in `netflix.list`
+- Max / HBO Max in `hbo_max.list`
+
+The updater is intentionally structured so we can add more services later without replacing the existing file layout.
+
+For OpenAI, Netflix, and Max / HBO Max, the repo currently keeps curated baselines. OpenAI's Help Center uses Cloudflare bot challenges that block simple unattended fetches, while Netflix and Max don't publish a practical public allowlist we can scrape reliably.
 
 ## Automation
 
 The GitHub Actions workflow runs every day at 09:15 Asia/Shanghai time, which is `01:15 UTC`, and can also be triggered manually from the Actions tab.
 
-When the upstream domains change, the workflow regenerates `AI.list` and commits the update back to `main`.
+When the upstream domains or curated baselines change, the workflow regenerates all list files and commits the update back to `main`.

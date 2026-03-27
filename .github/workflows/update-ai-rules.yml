@@ -1,4 +1,4 @@
-name: Update AI Rules
+name: Update Rule Lists
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  update-ai-rules:
+  update-rule-lists:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Regenerate AI.list
+      - name: Regenerate rule lists
         run: python3 scripts/update_ai_rules.py
 
       - name: Commit and push changes
@@ -33,6 +33,6 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add AI.list scripts/update_ai_rules.py README.md .github/workflows/update-ai-rules.yml
-          git commit -m "chore: update AI rules"
+          git add AI.list apple.list netflix.list hbo_max.list scripts/update_ai_rules.py README.md .github/workflows/update-ai-rules.yml
+          git commit -m "chore: update rule lists"
           git push
