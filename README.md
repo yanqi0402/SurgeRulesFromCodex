@@ -47,3 +47,10 @@ For most AI services, the repo intentionally keeps conservative first-party base
 The GitHub Actions workflow runs every day at 09:15 Asia/Shanghai time, which is `01:15 UTC`, and can also be triggered manually from the Actions tab.
 
 When the upstream domains or curated baselines change, the workflow regenerates all list files and commits the update back to `main`.
+
+For local scheduled runs outside GitHub Actions, `scripts/run_local_update_and_commit.py` refreshes both the parent Claude Code outputs and this repo's rule lists, then creates a commit only when:
+
+- the subrepo is clean before the run
+- only the publishable rule list files changed
+
+This keeps unattended local automation from accidentally committing unrelated manual edits.
