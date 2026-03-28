@@ -50,12 +50,58 @@ class RuleList:
     providers: tuple[Provider, ...]
 
 
+@dataclass(frozen=True)
+class ProviderResult:
+    provider: Provider
+    rules: tuple[RuleEntry, ...]
+    used_fallback: bool = False
+    error: str | None = None
+
+
 def domain(value: str) -> RuleEntry:
     return RuleEntry("DOMAIN", value)
 
 
 def domain_suffix(value: str) -> RuleEntry:
     return RuleEntry("DOMAIN-SUFFIX", value)
+
+
+def curated_provider(
+    name: str,
+    source_url: str,
+    *,
+    suffixes: tuple[str, ...] = (),
+    domains: tuple[str, ...] = (),
+    method: str = "Curated first-party baseline.",
+    process: str,
+    note: str = "",
+) -> Provider:
+    rules = tuple(domain(value) for value in domains) + tuple(
+        domain_suffix(value) for value in suffixes
+    )
+    return Provider(
+        name=name,
+        source_url=source_url,
+        fallback_rules=rules,
+        live_fetch=False,
+        method=method,
+        process=process,
+        note=note,
+    )
+
+
+CLAUDE = curated_provider(
+    name="Claude",
+    source_url="https://claude.ai/",
+    suffixes=("anthropic.com", "claude.ai", "claudeusercontent.com"),
+    method="Curated first-party baseline from Anthropic's public product domains.",
+    process=(
+        "Keep Anthropic-owned domains that directly front the Claude web app, shared content, "
+        "and account-level traffic. This broader Claude block complements the narrower official "
+        "Claude Code network allowlist."
+    ),
+    note="Covers general Claude app access in addition to the separate Claude Code block.",
+)
 
 
 CLAUDE_CODE = Provider(
@@ -127,6 +173,20 @@ OPENAI = Provider(
     ),
 )
 
+SORA = curated_provider(
+    name="Sora",
+    source_url="https://sora.com/",
+    suffixes=("sora.com",),
+    domains=("sora-cdn.oaistatic.com",),
+    method="Curated service-specific baseline from OpenAI's Sora product domains.",
+    process=(
+        "Keep the dedicated Sora web domain and the exact Sora-specific OpenAI static asset host "
+        "so the service can be routed independently even though broader OpenAI domains already "
+        "appear elsewhere in AI.list."
+    ),
+    note="The exact Sora CDN host is retained for clarity even though oaistatic.com is already covered by OpenAI.",
+)
+
 APPLE_INTELLIGENCE = Provider(
     name="Apple Intelligence",
     source_url="https://support.apple.com/en-us/101555",
@@ -135,6 +195,7 @@ APPLE_INTELLIGENCE = Provider(
         domain("apple-relay.cloudflare.com"),
         domain("apple-relay.fastly-edge.com"),
         domain("cp4.cloudflare.com"),
+        domain("gspe1-ssl.ls.apple.com"),
         domain("guzzoni.apple.com"),
         domain_suffix("smoot.apple.com"),
     ),
@@ -146,8 +207,282 @@ APPLE_INTELLIGENCE = Provider(
         "into a compact mix of DOMAIN and DOMAIN-SUFFIX rules."
     ),
     note=(
-        "Curated from Apple's enterprise network guidance for Apple Intelligence, Siri, "
-        "and Search."
+        "Curated from Apple's enterprise network guidance for Apple Intelligence, Siri, and Search."
+    ),
+)
+
+CEREBRAS = curated_provider(
+    name="Cerebras",
+    source_url="https://www.cerebras.ai/",
+    suffixes=("cerebras.ai",),
+    process=(
+        "Use Cerebras' primary AI product domain as a focused DOMAIN-SUFFIX rule so hosted "
+        "inference and console access can be proxied without introducing unrelated third-party hosts."
+    ),
+)
+
+CHORUS = curated_provider(
+    name="Chorus",
+    source_url="https://chorus.sh/",
+    suffixes=("chorus.sh",),
+    process=(
+        "Use Chorus' primary product domain as a compact first-party baseline and avoid expanding "
+        "into undocumented infrastructure that the vendor does not publicly enumerate."
+    ),
+)
+
+CLOUDFLARE_AI_GATEWAY = curated_provider(
+    name="Cloudflare AI Gateway",
+    source_url="https://developers.cloudflare.com/ai-gateway/",
+    domains=("gateway.ai.cloudflare.com",),
+    method="Curated official exact-host baseline from Cloudflare's AI Gateway documentation.",
+    process=(
+        "Keep Cloudflare AI Gateway on its documented entry hostname and express it as an exact "
+        "DOMAIN rule because the product is fronted through a single stable gateway host."
+    ),
+)
+
+MICROSOFT_COPILOT = curated_provider(
+    name="Microsoft Copilot",
+    source_url="https://copilot.microsoft.com/",
+    domains=("copilot.microsoft.com",),
+    suffixes=("microsoftonline.com",),
+    method="Curated first-party baseline with Microsoft sign-in dependency.",
+    process=(
+        "Keep the dedicated Copilot web app hostname and the Microsoft account domain family "
+        "commonly needed for sign-in and session establishment when AI.list is used without the "
+        "broader microsoft.list ruleset."
+    ),
+    note="microsoftonline.com also appears in microsoft.list and is duplicated here for AI-only use.",
+)
+
+GITHUB_COPILOT = curated_provider(
+    name="GitHub Copilot",
+    source_url="https://github.com/features/copilot",
+    domains=("api.github.com",),
+    suffixes=("githubcopilot.com",),
+    method="Curated AI-specific baseline with a GitHub API dependency.",
+    process=(
+        "Keep GitHub Copilot's dedicated service domain family plus the exact GitHub API host "
+        "that is commonly used for Copilot token and service exchanges in editors and IDEs."
+    ),
+    note="api.github.com is broader than Copilot-only traffic, but it is commonly needed for Copilot auth and token flows.",
+)
+
+CURSOR = curated_provider(
+    name="Cursor",
+    source_url="https://cursor.sh/",
+    suffixes=("cursor.sh",),
+    process=(
+        "Use Cursor's primary product domain as the first-party baseline for editor, auth, and "
+        "update traffic that is visibly tied to the vendor-owned hostname."
+    ),
+)
+
+DIA = curated_provider(
+    name="DIA",
+    source_url="https://www.diabrowser.engineering/",
+    suffixes=("diabrowser.engineering",),
+    process=(
+        "Keep DIA's product domain family only, which is the most conservative way to proxy the "
+        "service without assuming undocumented backend or CDN dependencies."
+    ),
+)
+
+DIFY = curated_provider(
+    name="Dify",
+    source_url="https://dify.ai/",
+    suffixes=("dify.ai",),
+    process=(
+        "Use Dify's primary hosted service domain as a focused baseline so the managed app and "
+        "cloud entrypoints can be proxied without sweeping in unrelated generic infrastructure."
+    ),
+)
+
+GOOGLE_AI_STUDIO = curated_provider(
+    name="Google AI Studio",
+    source_url="https://ai.google.dev/aistudio",
+    domains=(
+        "ai.google.dev",
+        "alkalicore-pa.clients6.google.com",
+        "alkalimakersuite-pa.clients6.google.com",
+        "waa-pa.clients6.google.com",
+    ),
+    suffixes=("aistudio.google.com", "generativeai.google", "makersuite.google.com"),
+    method="Curated official baseline from Google's Gemini developer and AI Studio properties.",
+    process=(
+        "Combine the current Google AI Studio entrypoints with the older MakerSuite compatibility "
+        "domain and the exact Google bootstrap hosts that show up around studio initialization and "
+        "developer console access."
+    ),
+    note="Retains both current and legacy Google AI Studio naming so older MakerSuite links still route correctly.",
+)
+
+GOOGLE_DEEPMIND = curated_provider(
+    name="Google DeepMind",
+    source_url="https://deepmind.google/",
+    suffixes=("deepmind.com", "deepmind.google"),
+    process=(
+        "Keep the DeepMind brand domains only, which is enough for the public web experience "
+        "without broadening into unrelated Google infrastructure."
+    ),
+)
+
+GOOGLE_GENERATIVE_LANGUAGE_API = curated_provider(
+    name="Google Generative Language API",
+    source_url="https://ai.google.dev/api",
+    domains=(
+        "generativelanguage.googleapis.com",
+        "geller-pa.googleapis.com",
+        "proactivebackend-pa.googleapis.com",
+    ),
+    method="Curated official API baseline from Google's Gemini API documentation.",
+    process=(
+        "Use the documented Gemini API host and a small set of closely related Google backend "
+        "hosts as exact DOMAIN rules so API traffic is captured without proxying broad swaths of "
+        "googleapis.com."
+    ),
+)
+
+GOOGLE_GEMINI = curated_provider(
+    name="Google Gemini",
+    source_url="https://gemini.google/about/",
+    domains=("aisandbox-pa.googleapis.com", "apis.google.com", "robinfrontend-pa.googleapis.com"),
+    suffixes=("bard.google.com", "gemini.google", "gemini.google.com"),
+    method="Curated official product baseline from Google's Gemini web properties.",
+    process=(
+        "Keep the current Gemini domains, the legacy Bard compatibility host, and a small set of "
+        "exact Google frontend hosts that are closely tied to the Gemini web app."
+    ),
+)
+
+GOOGLE_NOTEBOOKLM = curated_provider(
+    name="Google NotebookLM",
+    source_url="https://notebooklm.google/",
+    suffixes=("notebooklm.google", "notebooklm.google.com"),
+    process=(
+        "Use NotebookLM's direct product domains as a conservative baseline and avoid pulling in "
+        "broader Google service domains that are not NotebookLM-specific."
+    ),
+)
+
+GROK = curated_provider(
+    name="Grok",
+    source_url="https://grok.com/",
+    suffixes=("grok.com", "x.ai"),
+    process=(
+        "Keep xAI's Grok-facing brand domains only, which is the smallest first-party set that "
+        "covers the service without guessing at the wider X platform infrastructure."
+    ),
+)
+
+GROQ = curated_provider(
+    name="Groq",
+    source_url="https://groq.com/",
+    suffixes=("groq.com",),
+    process=(
+        "Use Groq's primary product domain as a focused DOMAIN-SUFFIX rule for its hosted AI "
+        "console and related first-party traffic."
+    ),
+)
+
+CLIPDROP = curated_provider(
+    name="Clipdrop",
+    source_url="https://clipdrop.co/",
+    suffixes=("clipdrop.co",),
+    process=(
+        "Use Clipdrop's own product domain as a standalone AI service baseline instead of folding "
+        "it into another vendor block."
+    ),
+)
+
+JASPER = curated_provider(
+    name="Jasper",
+    source_url="https://www.jasper.ai/",
+    suffixes=("jasper.ai",),
+    process=(
+        "Use Jasper's primary product domain as the first-party baseline and keep the rule tight "
+        "instead of bundling in unrelated third-party creative tooling domains."
+    ),
+)
+
+JETBRAINS_AI = curated_provider(
+    name="JetBrains AI",
+    source_url="https://www.jetbrains.com/ai/",
+    suffixes=("jetbrains.ai",),
+    process=(
+        "Keep JetBrains AI on its dedicated vendor-owned AI domain family so the service can be "
+        "proxied independently from the rest of JetBrains' broader product estate."
+    ),
+)
+
+META_AI = curated_provider(
+    name="Meta AI",
+    source_url="https://www.meta.ai/",
+    suffixes=("meta.ai",),
+    process=(
+        "Use Meta AI's own product domain as a minimal first-party baseline and avoid expanding "
+        "into the much wider set of general Meta properties."
+    ),
+)
+
+OPENART = curated_provider(
+    name="OpenArt",
+    source_url="https://openart.ai/",
+    suffixes=("openart.ai",),
+    process=(
+        "Use OpenArt's primary AI product domain as a compact service baseline without assuming "
+        "additional third-party hosts."
+    ),
+)
+
+OPENROUTER = curated_provider(
+    name="OpenRouter",
+    source_url="https://openrouter.ai/",
+    suffixes=("openrouter.ai",),
+    process=(
+        "Keep OpenRouter on its first-party domain family so routed model access and console "
+        "traffic can be proxied cleanly."
+    ),
+)
+
+PERPLEXITY = curated_provider(
+    name="Perplexity AI",
+    source_url="https://www.perplexity.ai/",
+    suffixes=("perplexity.ai",),
+    process=(
+        "Use Perplexity's main product domain as a focused baseline for the public app and search "
+        "experience without broadening to unrelated infrastructure."
+    ),
+)
+
+POE = curated_provider(
+    name="Poe",
+    source_url="https://poe.com/",
+    suffixes=("poe.com",),
+    process=(
+        "Use Poe's primary product domain as the first-party baseline for chat access and avoid "
+        "guessing at its internal CDN or telemetry dependencies."
+    ),
+)
+
+WINDSURF = curated_provider(
+    name="Windsurf",
+    source_url="https://windsurf.com/",
+    suffixes=("codeium.com", "codeiumdata.com", "windsurf.com"),
+    process=(
+        "Combine the current Windsurf product domain with the Codeium service families it still "
+        "depends on, so both app access and editor-side AI traffic can be routed together."
+    ),
+)
+
+ZED = curated_provider(
+    name="Zed",
+    source_url="https://zed.dev/",
+    suffixes=("zed.dev",),
+    process=(
+        "Use Zed's product domain as a conservative first-party baseline for the editor and its "
+        "vendor-hosted AI-facing entrypoints."
     ),
 )
 
@@ -283,7 +618,38 @@ MICROSOFT = Provider(
 RULE_LISTS = (
     RuleList(
         output_path=Path("AI.list"),
-        providers=(CLAUDE_CODE, OPENAI, APPLE_INTELLIGENCE),
+        providers=(
+            CLAUDE,
+            CLAUDE_CODE,
+            OPENAI,
+            SORA,
+            APPLE_INTELLIGENCE,
+            CEREBRAS,
+            CHORUS,
+            CLOUDFLARE_AI_GATEWAY,
+            MICROSOFT_COPILOT,
+            GITHUB_COPILOT,
+            CURSOR,
+            DIA,
+            DIFY,
+            GOOGLE_AI_STUDIO,
+            GOOGLE_DEEPMIND,
+            GOOGLE_GENERATIVE_LANGUAGE_API,
+            GOOGLE_GEMINI,
+            GOOGLE_NOTEBOOKLM,
+            GROK,
+            GROQ,
+            CLIPDROP,
+            JASPER,
+            JETBRAINS_AI,
+            META_AI,
+            OPENART,
+            OPENROUTER,
+            PERPLEXITY,
+            POE,
+            WINDSURF,
+            ZED,
+        ),
     ),
     RuleList(
         output_path=Path("apple.list"),
@@ -423,9 +789,12 @@ def extract_microsoft_rules(provider: Provider) -> list[RuleEntry]:
     return sort_rules(rules)
 
 
-def resolve_provider_rules(provider: Provider) -> list[RuleEntry]:
+def resolve_provider_rules(provider: Provider) -> ProviderResult:
     if not provider.live_fetch:
-        return sort_rules(provider.fallback_rules)
+        return ProviderResult(
+            provider=provider,
+            rules=tuple(sort_rules(provider.fallback_rules)),
+        )
 
     try:
         if provider.source_kind == "m365_endpoints":
@@ -438,15 +807,72 @@ def resolve_provider_rules(provider: Provider) -> list[RuleEntry]:
             f"[warn] {provider.name}: failed to fetch official source, using fallback ({exc})",
             file=sys.stderr,
         )
-        return sort_rules(provider.fallback_rules)
+        return ProviderResult(
+            provider=provider,
+            rules=tuple(sort_rules(provider.fallback_rules)),
+            used_fallback=True,
+            error=str(exc),
+        )
     if rules:
-        return rules
+        return ProviderResult(
+            provider=provider,
+            rules=tuple(rules),
+        )
 
     print(
         f"[warn] {provider.name}: failed to parse official source, using fallback",
         file=sys.stderr,
     )
-    return sort_rules(provider.fallback_rules)
+    return ProviderResult(
+        provider=provider,
+        rules=tuple(sort_rules(provider.fallback_rules)),
+        used_fallback=True,
+        error="failed to parse official source",
+    )
+
+
+def load_existing_provider_blocks(
+    output_path: Path,
+    providers: Iterable[Provider],
+) -> dict[str, str]:
+    if not output_path.exists():
+        return {}
+
+    provider_names = {provider.name for provider in providers}
+    blocks: dict[str, str] = {}
+    current_name: str | None = None
+    current_lines: list[str] = []
+
+    for line in output_path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("# ") and line[2:] in provider_names:
+            if current_name is not None:
+                blocks[current_name] = "\n".join(current_lines).rstrip()
+            current_name = line[2:]
+            current_lines = [line]
+            continue
+        if current_name is not None:
+            current_lines.append(line)
+
+    if current_name is not None:
+        blocks[current_name] = "\n".join(current_lines).rstrip()
+
+    return blocks
+
+
+def render_provider_block(provider: Provider, rules: Iterable[RuleEntry]) -> str:
+    lines = [
+        f"# {provider.name}",
+        f"# Source: {provider.source_url}",
+    ]
+    if provider.method:
+        lines.extend(render_comment_block("Method", provider.method))
+    if provider.process:
+        lines.extend(render_comment_block("Process", provider.process))
+    if provider.note:
+        lines.extend(render_comment_block("Note", provider.note))
+    for rule in rules:
+        lines.append(f"{rule.rule_type},{rule.value}")
+    return "\n".join(lines).rstrip()
 
 
 def render_rules(rule_list: RuleList) -> str:
@@ -455,19 +881,18 @@ def render_rules(rule_list: RuleList) -> str:
         "# Intended for Surge RULE-SET usage.",
         "",
     ]
+    existing_blocks = load_existing_provider_blocks(rule_list.output_path, rule_list.providers)
 
     for provider in rule_list.providers:
-        rules = resolve_provider_rules(provider)
-        lines.append(f"# {provider.name}")
-        lines.append(f"# Source: {provider.source_url}")
-        if provider.method:
-            lines.extend(render_comment_block("Method", provider.method))
-        if provider.process:
-            lines.extend(render_comment_block("Process", provider.process))
-        if provider.note:
-            lines.extend(render_comment_block("Note", provider.note))
-        for rule in rules:
-            lines.append(f"{rule.rule_type},{rule.value}")
+        result = resolve_provider_rules(provider)
+        if result.used_fallback and provider.name in existing_blocks:
+            print(
+                f"[warn] {provider.name}: preserving existing block in {rule_list.output_path}",
+                file=sys.stderr,
+            )
+            lines.append(existing_blocks[provider.name])
+        else:
+            lines.append(render_provider_block(provider, result.rules))
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"

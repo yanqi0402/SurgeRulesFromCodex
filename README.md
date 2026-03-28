@@ -4,7 +4,7 @@ Auto-maintained Surge rule lists.
 
 ## Files
 
-- `AI.list`: AI-related domains, currently including Claude Code, OpenAI, and Apple Intelligence
+- `AI.list`: AI-related domains, currently including Claude, Claude Code, OpenAI, Sora, Apple Intelligence, Copilot, Google AI services, Grok, Groq, Cursor, Perplexity, Windsurf, Zed, and more
 - `apple.list`: Apple service domains
 - `netflix.list`: Netflix domains
 - `hbo_max.list`: Max / HBO Max domains
@@ -15,11 +15,20 @@ Auto-maintained Surge rule lists.
 
 ## Current coverage
 
-`AI.list` currently tracks:
+`AI.list` currently tracks a mix of live-fetched official sources and curated first-party baselines for commonly blocked international AI services.
+
+Live-fetched sources currently include:
 
 - `https://code.claude.com/docs/en/network-config`
-- `https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps`
-- `https://support.apple.com/en-us/101555`
+
+Curated official or first-party baselines currently include services such as:
+
+- Claude / Claude Code
+- OpenAI / Sora
+- Apple Intelligence / Siri
+- Google AI Studio / Gemini / NotebookLM / Gemini API / DeepMind
+- Microsoft Copilot / GitHub Copilot
+- Grok / Groq / Cursor / Dify / OpenRouter / Perplexity / Poe / Windsurf / Zed
 
 Additional list files currently track:
 
@@ -31,7 +40,7 @@ Additional list files currently track:
 
 The updater is intentionally structured so we can add more services later without replacing the existing file layout.
 
-For OpenAI, Netflix, Max / HBO Max, and TikTok, the repo currently keeps curated baselines. OpenAI's Help Center uses Cloudflare bot challenges that block simple unattended fetches, while Netflix and Max don't publish a practical public allowlist we can scrape reliably. The TikTok list is intentionally conservative and sticks to the official TikTok host families visible in developer documentation. Microsoft is generated from the official Microsoft 365 endpoint web service when available, with a curated fallback baseline.
+For most AI services, the repo intentionally keeps conservative first-party baselines because vendors rarely publish a clean public allowlist. OpenAI's Help Center uses Cloudflare bot challenges that block simple unattended fetches, while many other AI vendors publish product domains but not formal network requirement tables. Microsoft is generated from the official Microsoft 365 endpoint web service when available, with a curated fallback baseline.
 
 ## Automation
 
