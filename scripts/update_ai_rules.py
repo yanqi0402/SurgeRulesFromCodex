@@ -578,6 +578,23 @@ TIKTOK_INTL = Provider(
     ),
 )
 
+JD_CN = curated_provider(
+    name="JD.com (Mainland China)",
+    source_url="https://about.jd.com/en/",
+    suffixes=("3.cn", "360buy.com", "360buyimg.com", "jd.com", "jdpay.com"),
+    method="Curated first-party baseline from JD-owned mainland web properties.",
+    process=(
+        "Keep the stable JD-operated domain families that consistently cover the mainland web "
+        "storefront, short links, first-party static assets, and payment entrypoints, then "
+        "express them as DOMAIN-SUFFIX rules without expanding into speculative logistics, cloud, "
+        "or unrelated affiliate infrastructure."
+    ),
+    note=(
+        "Built from JD-owned web properties including the corporate site, mainland storefront "
+        "family, 3.cn short links, 360buyimg static assets, and JD Pay."
+    ),
+)
+
 MICROSOFT = Provider(
     name="Microsoft",
     source_url="https://endpoints.office.com/endpoints/worldwide",
@@ -666,6 +683,10 @@ RULE_LISTS = (
     RuleList(
         output_path=Path("tik_tok.list"),
         providers=(TIKTOK_INTL,),
+    ),
+    RuleList(
+        output_path=Path("jd.list"),
+        providers=(JD_CN,),
     ),
     RuleList(
         output_path=Path("microsoft.list"),

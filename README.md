@@ -6,6 +6,7 @@ Auto-maintained Surge rule lists.
 
 - `AI.list`: AI-related domains, currently including Claude, Claude Code, OpenAI, Sora, Apple Intelligence, Copilot, Google AI services, Grok, Groq, Cursor, Perplexity, Windsurf, Zed, and more
 - `apple.list`: Apple service domains
+- `jd.list`: JD.com mainland China domains
 - `netflix.list`: Netflix domains
 - `hbo_max.list`: Max / HBO Max domains
 - `tik_tok.list`: TikTok international domains
@@ -33,6 +34,7 @@ Curated official or first-party baselines currently include services such as:
 Additional list files currently track:
 
 - Apple services in `apple.list`
+- JD.com mainland China in `jd.list`
 - Netflix in `netflix.list`
 - Max / HBO Max in `hbo_max.list`
 - TikTok international in `tik_tok.list`

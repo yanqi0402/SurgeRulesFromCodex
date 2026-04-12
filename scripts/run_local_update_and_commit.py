@@ -15,6 +15,7 @@ SUBREPO_UPDATER = SUBREPO / "scripts" / "update_ai_rules.py"
 PUBLISHABLE_FILES = (
     "AI.list",
     "apple.list",
+    "jd.list",
     "netflix.list",
     "hbo_max.list",
     "tik_tok.list",
