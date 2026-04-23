@@ -19,10 +19,18 @@ DOMAIN-SUFFIX,claudeusercontent.com
 #   access plus installer and update traffic, extract hostnames, convert them to Surge DOMAIN
 #   rules, and fall back to a small official baseline if fetching or parsing fails.
 DOMAIN,api.anthropic.com
+DOMAIN,assets.claude.ai
 DOMAIN,claude.ai
+DOMAIN,claude.com
+DOMAIN,code.claude.com
 DOMAIN,downloads.claude.ai
 DOMAIN,platform.claude.com
+DOMAIN,status.anthropic.com
 DOMAIN,storage.googleapis.com
+DOMAIN,support.claude.com
+DOMAIN,trust.anthropic.com
+DOMAIN,www.anthropic.com
+DOMAIN,www.claude.com
 
 # OpenAI
 # Source: https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
