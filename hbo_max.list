@@ -11,3 +11,4 @@
 #   later if you want to capture additional service-specific delivery hosts.
 DOMAIN-SUFFIX,hbomax.com
 DOMAIN-SUFFIX,max.com
+DOMAIN-SUFFIX,discomax.com
