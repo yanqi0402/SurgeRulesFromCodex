@@ -19,11 +19,13 @@ DOMAIN-SUFFIX,claudeusercontent.com
 #   access plus installer and update traffic, extract hostnames, convert them to Surge DOMAIN
 #   rules, and fall back to a small official baseline if fetching or parsing fails.
 DOMAIN,api.anthropic.com
+DOMAIN,assets-proxy.anthropic.com
 DOMAIN,assets.claude.ai
 DOMAIN,claude.ai
 DOMAIN,claude.com
 DOMAIN,code.claude.com
 DOMAIN,downloads.claude.ai
+DOMAIN,mcp-proxy.anthropic.com
 DOMAIN,platform.claude.com
 DOMAIN,status.anthropic.com
 DOMAIN,storage.googleapis.com
