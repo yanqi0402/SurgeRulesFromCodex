@@ -138,6 +138,7 @@ DOMAIN-SUFFIX,auth.microsoft.com
 DOMAIN-SUFFIX,azure-apim.net
 DOMAIN-SUFFIX,azurerms.com
 DOMAIN-SUFFIX,cdn.onenote.net
+DOMAIN-SUFFIX,cloud.microsoft
 DOMAIN-SUFFIX,cortana.ai
 DOMAIN-SUFFIX,entrust.net
 DOMAIN-SUFFIX,events.data.microsoft.com
@@ -183,12 +184,14 @@ DOMAIN-SUFFIX,security.microsoft.com
 DOMAIN-SUFFIX,sharepoint.com
 DOMAIN-SUFFIX,sharepointonline.com
 DOMAIN-SUFFIX,skype.com
+DOMAIN-SUFFIX,static.microsoft
 DOMAIN-SUFFIX,streaming.mediaservices.windows.net
 DOMAIN-SUFFIX,svc.ms
 DOMAIN-SUFFIX,symcb.com
 DOMAIN-SUFFIX,symcd.com
 DOMAIN-SUFFIX,teams.cloud.microsoft
 DOMAIN-SUFFIX,teams.microsoft.com
+DOMAIN-SUFFIX,usercontent.microsoft
 DOMAIN-SUFFIX,verisign.com
 DOMAIN-SUFFIX,verisign.net
 DOMAIN-SUFFIX,virtualearth.net
