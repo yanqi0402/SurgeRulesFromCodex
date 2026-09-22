@@ -18,6 +18,7 @@ DOMAIN-SUFFIX,claudeusercontent.com
 # Process: Download the official documentation page, locate the documented URL lists for core
 #   access plus installer and update traffic, extract hostnames, convert them to Surge DOMAIN
 #   rules, and fall back to a small official baseline if fetching or parsing fails.
+DOMAIN,academy.claude.com
 DOMAIN,api.anthropic.com
 DOMAIN,assets-proxy.anthropic.com
 DOMAIN,assets.claude.ai
