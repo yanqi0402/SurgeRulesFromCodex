@@ -28,6 +28,7 @@ DOMAIN,code.claude.com
 DOMAIN,downloads.claude.ai
 DOMAIN,mcp-proxy.anthropic.com
 DOMAIN,platform.claude.com
+DOMAIN,sso.claude.com
 DOMAIN,status.anthropic.com
 DOMAIN,storage.googleapis.com
 DOMAIN,support.claude.com
