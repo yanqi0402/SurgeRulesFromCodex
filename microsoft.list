@@ -24,10 +24,8 @@ DOMAIN,amp.azure.net
 DOMAIN,api.passwordreset.microsoftonline.com
 DOMAIN,apis.live.net
 DOMAIN,appsforoffice.microsoft.com
-DOMAIN,assets.onestore.ms
 DOMAIN,auth.gfx.ms
 DOMAIN,autologon.microsoftazuread-sso.com
-DOMAIN,becws.microsoftonline.com
 DOMAIN,c.bing.com
 DOMAIN,c.bing.net
 DOMAIN,c.live.com
@@ -60,8 +58,6 @@ DOMAIN,go.microsoft.com
 DOMAIN,graph.microsoft.com
 DOMAIN,graph.windows.net
 DOMAIN,informationprotection.hosting.portal.azure.net
-DOMAIN,isrg.trustid.ocsp.identrust.com
-DOMAIN,join.secure.skypeassets.com
 DOMAIN,login-us.microsoftonline.com
 DOMAIN,login.live.com
 DOMAIN,login.microsoft.com
@@ -72,7 +68,6 @@ DOMAIN,login.windows.net
 DOMAIN,logincert.microsoftonline.com
 DOMAIN,loginex.microsoftonline.com
 DOMAIN,mem.gfx.ms
-DOMAIN,mlccdnprod.azureedge.net
 DOMAIN,mscrl.microsoft.com
 DOMAIN,msdn.microsoft.com
 DOMAIN,nexus.microsoftonline-p.com
@@ -80,7 +75,6 @@ DOMAIN,o15.officeredir.microsoft.com
 DOMAIN,ocos-office365-s2s.msedge.net
 DOMAIN,ocsp.digicert.com
 DOMAIN,ocsp.globalsign.com
-DOMAIN,ocsp.msocsp.com
 DOMAIN,ocsp2.globalsign.com
 DOMAIN,ocspx.digicert.com
 DOMAIN,office.live.com
@@ -100,9 +94,7 @@ DOMAIN,outlook.office365.com
 DOMAIN,partnerservices.getmicrosoftkey.com
 DOMAIN,passwordreset.microsoftonline.com
 DOMAIN,platform.linkedin.com
-DOMAIN,prod.msocdn.com
 DOMAIN,protection.office.com
-DOMAIN,provisioningapi.microsoftonline.com
 DOMAIN,purview.microsoft.com
 DOMAIN,r.office.microsoft.com
 DOMAIN,secure.globalsign.com
@@ -112,7 +104,6 @@ DOMAIN,signup.live.com
 DOMAIN,smtp.office365.com
 DOMAIN,spoprod-a.akamaihd.net
 DOMAIN,storage.live.com
-DOMAIN,support.microsoft.com
 DOMAIN,sway.com
 DOMAIN,teams.cloud.microsoft
 DOMAIN,teams.microsoft.com
@@ -159,7 +150,6 @@ DOMAIN-SUFFIX,msecnd.net
 DOMAIN-SUFFIX,msftauth.net
 DOMAIN-SUFFIX,msftauthimages.net
 DOMAIN-SUFFIX,msftidentity.com
-DOMAIN-SUFFIX,msidentity.com
 DOMAIN-SUFFIX,msocdn.com
 DOMAIN-SUFFIX,mx.microsoft
 DOMAIN-SUFFIX,o365weve.com
